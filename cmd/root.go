@@ -26,4 +26,6 @@ func Execute() {
 func init() {
 	// Global flags
 	rootCmd.PersistentFlags().BoolVar(&JsonOutput, "json", false, "JSON output")
+
+	rootCmd.AddCommand(doctorCmd)
 }
