@@ -91,7 +91,7 @@ var Command = &cobra.Command{
 
 		output.Section("Python")
 
-		pythonVersionCommand := exec.Command("pythonasd", "--version")
+		pythonVersionCommand := exec.Command("python", "--version")
 		pythonVersionOutput, pythonVersionErr := pythonVersionCommand.CombinedOutput()
 		if pythonVersionErr != nil {
 			output.Error("python not installed")
