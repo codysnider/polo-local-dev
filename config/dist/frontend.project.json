@@ -11,5 +11,18 @@
         "docker-compose up -d frontend frontend-reverse-proxy frontend-login"
       ]
     }
+  },
+  "frontend-db": {
+    "repo": "polo-database",
+    "name": "frontend-db",
+    "groups": [
+      "frontend"
+    ],
+    "default_version": "master",
+    "depends_on": {
+      "run": [
+        "docker-compose up -d flyway mysql"
+      ]
+    }
   }
 }
