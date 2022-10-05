@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"github.com/poloniex/polo-local-dev/cmd/clone"
+	"github.com/poloniex/polo-local-dev/cmd/doctor"
+	"github.com/poloniex/polo-local-dev/cmd/fork"
 	"github.com/spf13/cobra"
 	"log"
 	"os"
@@ -27,5 +30,13 @@ func init() {
 	// Global flags
 	rootCmd.PersistentFlags().BoolVar(&JsonOutput, "json", false, "JSON output")
 
-	rootCmd.AddCommand(doctorCmd)
+	// Doctor
+	rootCmd.AddCommand(doctor.Command)
+
+	// Fork
+	rootCmd.AddCommand(fork.Command)
+
+	// Clone
+	rootCmd.AddCommand(clone.Command)
+
 }

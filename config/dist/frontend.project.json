@@ -1,0 +1,15 @@
+{
+  "frontend": {
+    "repo": "polo-frontend",
+    "name": "frontend",
+    "groups": [
+      "frontend"
+    ],
+    "default_version": "master",
+    "depends_on": {
+      "run": [
+        "docker-compose up -d frontend frontend-reverse-proxy frontend-login"
+      ]
+    }
+  }
+}

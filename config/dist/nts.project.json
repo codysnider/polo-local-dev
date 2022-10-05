@@ -1,0 +1,217 @@
+{
+  "spot-local-dev": {
+    "name": "spot-local-dev",
+    "groups": [
+      "nts"
+    ],
+    "default_version": "master",
+    "build_cmd": [
+      "docker build -t poloniex-local/flyway ./db/."
+    ]
+  },
+  "spot-common": {
+    "name": "spot-common",
+    "groups": [
+      "nts"
+    ],
+    "default_version": "BRANCH_PHASE2",
+    "depends_on": {
+      "compile": [
+        "spot-proto",
+        "spot-local-dev"
+      ]
+    }
+  },
+  "spot-proto": {
+    "name": "spot-proto",
+    "groups": [
+      "nts"
+    ],
+    "default_version": "BRANCH_PHASE2",
+    "depends_on": {
+      "compile": [
+        "spot-local-dev"
+      ]
+    }
+  },
+  "spot-account": {
+    "name": "spot-account",
+    "groups": [
+      "nts"
+    ],
+    "default_version": "master",
+    "depends_on": {
+      "compile": [
+        "spot-local-dev",
+        "spot-common",
+        "spot-proto"
+      ]
+    },
+    "flyway_path": "db/general/spot_account"
+  },
+  "spot-api-gateway": {
+    "name": "spot-api-gateway",
+    "default_version": "BRANCH_PHASE2",
+    "depends_on": {
+      "compile": [
+        "spot-local-dev",
+        "spot-common",
+        "spot-proto"
+      ]
+    }
+  },
+  "spot-basic-data": {
+    "name": "spot-basic-data",
+    "default_version": "BRANCH_PHASE2",
+    "depends_on": {
+      "compile": [
+        "spot-local-dev",
+        "spot-common",
+        "spot-proto"
+      ]
+    },
+    "flyway_path": "db/general/spot-basic-data"
+  },
+  "spot-broker": {
+    "name": "spot-broker",
+    "default_version": "master",
+    "depends_on": {
+      "compile": [
+        "spot-local-dev",
+        "spot-common",
+        "spot-proto"
+      ]
+    },
+    "flyway_path": "db/general/spot-broker"
+  },
+  "spot-clearing": {
+    "name": "spot-clearing",
+    "default_version": "master",
+    "depends_on": {
+      "compile": [
+        "spot-local-dev",
+        "spot-common",
+        "spot-proto"
+      ]
+    },
+    "flyway_path": "db/general/spot_clearing"
+  },
+  "spot-fee-schedule": {
+    "name": "spot-fee-schedule",
+    "default_version": "BRANCH_PHASE2",
+    "depends_on": {
+      "compile": [
+        "spot-local-dev",
+        "spot-common",
+        "spot-proto"
+      ]
+    }
+  },
+  "spot-feerate": {
+    "name": "spot-feerate",
+    "default_version": "BRANCH_PHASE2",
+    "depends_on": {
+      "compile": [
+        "spot-local-dev",
+        "spot-common",
+        "spot-proto"
+      ]
+    }
+  },
+  "spot-match-engine": {
+    "name": "spot-match-engine",
+    "default_version": "BRANCH_PHASE2",
+    "depends_on": {
+      "compile": [
+        "spot-local-dev"
+      ]
+    }
+  },
+  "spot-order": {
+    "name": "spot-order",
+    "default_version": "master",
+    "depends_on": {
+      "compile": [
+        "spot-local-dev",
+        "spot-common",
+        "spot-proto"
+      ]
+    },
+    "flyway_path": "db/general/spot-order"
+  },
+  "spot-quotation-data": {
+    "name": "spot-quotation-data",
+    "default_version": "BRANCH_PHASE2",
+    "depends_on": {
+      "compile": [
+        "spot-local-dev",
+        "spot-common",
+        "spot-proto"
+      ],
+      "run": [
+        "spot-quotation-engine"
+      ]
+    },
+    "flyway_path": "db"
+  },
+  "spot-quotation-engine": {
+    "name": "spot-quotation-engine",
+    "default_version": "BRANCH_PHASE2",
+    "depends_on": {
+      "compile": [
+        "spot-local-dev",
+        "spot-common",
+        "spot-proto"
+      ]
+    },
+    "flyway_path": "db/general"
+  },
+  "spot-quotation-gateway": {
+    "name": "spot-quotation-gateway",
+    "default_version": "BRANCH_PHASE2",
+    "depends_on": {
+      "compile": [
+        "spot-local-dev",
+        "spot-common",
+        "spot-proto"
+      ],
+      "run": [
+        "spot-quotation-engine"
+      ]
+    }
+  },
+  "spot-rebate": {
+    "name": "spot-rebate",
+    "default_version": "BRANCH_PHASE2",
+    "depends_on": {
+      "compile": [
+        "spot-local-dev",
+        "spot-common",
+        "spot-proto"
+      ]
+    }
+  },
+  "spot-smart-orders": {
+    "name": "spot-smart-orders",
+    "default_version": "master",
+    "depends_on": {
+      "compile": [
+        "spot-local-dev",
+        "spot-common",
+        "spot-proto"
+      ]
+    },
+    "flyway_path": "db"
+  },
+  "spot-unified-gateway": {
+    "name": "spot-unified-gateway",
+    "default_version": "BRANCH_PHASE2",
+    "depends_on": {
+      "compile": [
+        "spot-local-dev",
+        "spot-common",
+        "spot-proto"
+      ]
+    }
+  }
+}
