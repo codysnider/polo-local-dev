@@ -2,12 +2,8 @@
 
 ## Setup
 
-TODO: Build process to generate x86_64 and ARM darwin binaries
+```bash
+go run .
+```
 
-## Config
-
-| File                  | Type    | Description |
-|-----------------------|---------|-------------|
-| nts.project.json      | Project |             |
-| frontend.project.json | Project |             |
-| support.project.json  | Project |             |
+Will create config folder, install configs and present the options.
