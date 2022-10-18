@@ -7,3 +7,7 @@ func CommonProjectFlags(cmd *cobra.Command, groupFlag, projectFlag *string, allF
 	cmd.PersistentFlags().StringVarP(projectFlag, "project", "p", "", "project")
 	cmd.PersistentFlags().BoolVarP(allFlag, "all", "a", false, "all projects")
 }
+
+func DependencyFlags(cmd *cobra.Command, ignoreDeps *bool) {
+	cmd.PersistentFlags().BoolVarP(ignoreDeps, "ignore-deps", "i", false, "ignore dependency chain")
+}

@@ -1,17 +1,14 @@
-package start
+package build
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"github.com/poloniex/polo-local-dev/cmd/util"
 	"github.com/poloniex/polo-local-dev/config"
-	"github.com/poloniex/polo-local-dev/docker"
 	"github.com/poloniex/polo-local-dev/output"
 	"github.com/spf13/cobra"
 	"os"
 	"os/exec"
-	"time"
 )
 
 var groupFlag string
@@ -20,25 +17,25 @@ var allFlag bool
 var ignoreDepsFlag bool
 
 var Command = &cobra.Command{
-	Use:   "start",
-	Short: "Start project",
+	Use:   "build",
+	Short: "Build project",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 
-		output.Title("Start")
+		output.Title("Build")
 
-		var projectsToRun map[string]config.Project
+		var projectsToBuild map[string]config.Project
 		var projectsErr error
 		orderedProjects := []string{}
 
 		if ignoreDepsFlag {
-			projectsToRun, projectsErr = util.ProjectsFromFlags(groupFlag, projectFlag, allFlag)
-			for projectKey := range projectsToRun {
+			projectsToBuild, projectsErr = util.ProjectsFromFlags(groupFlag, projectFlag, allFlag)
+			for projectKey := range projectsToBuild {
 				orderedProjects = append(orderedProjects, projectKey)
 			}
 		} else {
-			projectsToRun, projectsErr = util.ProjectsFromFlagsWithDeps(groupFlag, projectFlag, allFlag, "run")
-			orderedProjects = config.GenerateOrderedSet(projectsToRun, "run")
+			projectsToBuild, projectsErr = util.ProjectsFromFlagsWithDeps(groupFlag, projectFlag, allFlag, "build")
+			orderedProjects = config.GenerateOrderedSet(projectsToBuild, "build")
 		}
 
 		if projectsErr != nil {
@@ -50,10 +47,12 @@ var Command = &cobra.Command{
 			project := config.GetProjectByKey(projectKey)
 			output.Section(project.Name)
 
-			for _, shellCmd := range project.RunPrepare() {
+			for _, shellCmd := range project.BuildPrepare() {
 
 				output.Plain(fmt.Sprintf("Command: %s", shellCmd.String()))
 				output.Plain(fmt.Sprintf("Path: %s", shellCmd.Dir))
+
+				s := output.Spin("Building", "Done")
 
 				var stdoutBuffer, stderrBuffer bytes.Buffer
 				shellCmd.Stdout = &stdoutBuffer
@@ -66,42 +65,13 @@ var Command = &cobra.Command{
 					if exiterr, ok := err.(*exec.ExitError); ok {
 						output.Error(fmt.Sprintf("Exit Status: %d", exiterr.ExitCode()))
 					}
-				} else {
-					output.Ok("Done without errors")
 				}
+
+				s.Stop()
 
 				if verbose, verboseFlagErr := cmd.Flags().GetBool("verbose"); verbose && verboseFlagErr == nil {
 					fmt.Println(shellCmd.Stdout)
 					fmt.Println(shellCmd.Stderr)
-				}
-			}
-
-			projectContainer := project.FindRunningContainer()
-			if len(projectContainer.ID) > 0 {
-				if !docker.ContainerHasHealthCheck(context.Background(), &projectContainer) {
-					output.Warning("Container has no health check")
-				} else {
-					healthCheckSpinner := output.Spin("Waiting for health check", output.OkString("Health check done"))
-					healthCheckSpinner.Start()
-
-					healthyStatus := make(chan bool, 1)
-					output.InputCancelFunc(func(healthy chan<- bool) {
-						for {
-							if docker.ContainerIsHealthy(&projectContainer) {
-								healthy <- true
-								break
-							}
-							time.Sleep(time.Second)
-						}
-					}, time.Second*30, healthyStatus)
-
-					if <-healthyStatus {
-						healthCheckSpinner.FinalMSG = output.OkString("Container healthy")
-					} else {
-						healthCheckSpinner.FinalMSG = output.ErrorString("Container NOT healthy")
-					}
-
-					healthCheckSpinner.Stop()
 				}
 			}
 		}

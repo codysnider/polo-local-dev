@@ -1,28 +1,104 @@
 {
+  "frontend-reverse-proxy": {
+    "repo": "polo-frontend",
+    "name": "frontend-reverse-proxy",
+    "groups": ["frontend"],
+    "default_version": "master",
+    "depends_on": {
+      "run": ["frontend", "frontend-login"]
+    },
+    "build_cmd": [
+      {
+        "command": "docker-compose build #NAME#",
+        "path": "#WORKSPACE_ROOT#/polo-workbench/"
+      }
+    ],
+    "run_cmd": [
+      {
+        "command": "docker-compose up -d --no-deps #NAME#",
+        "path": "#WORKSPACE_ROOT#/polo-workbench/"
+      }
+    ]
+  },
   "frontend": {
     "repo": "polo-frontend",
     "name": "frontend",
-    "groups": [
-      "frontend"
-    ],
+    "groups": ["frontend"],
     "default_version": "master",
     "depends_on": {
-      "run": [
-        "docker-compose up -d frontend frontend-reverse-proxy frontend-login"
-      ]
-    }
+      "run": ["users-database", "users-database-migrate", "statsd", "maildev", "x-redis"]
+    },
+    "build_cmd": [
+      {
+        "command": "docker-compose build #NAME#",
+        "path": "#WORKSPACE_ROOT#/polo-workbench/"
+      }
+    ],
+    "run_cmd": [
+      {
+        "command": "docker-compose up -d --no-deps #NAME#",
+        "path": "#WORKSPACE_ROOT#/polo-workbench/"
+      }
+    ]
   },
-  "frontend-db": {
-    "repo": "polo-database",
-    "name": "frontend-db",
-    "groups": [
-      "frontend"
-    ],
+  "frontend-login": {
+    "repo": "polo-frontend",
+    "name": "frontend-login",
+    "groups": ["frontend"],
     "default_version": "master",
     "depends_on": {
-      "run": [
-        "docker-compose up -d flyway mysql"
-      ]
-    }
+      "run": ["users-database", "users-database-migrate"]
+    },
+    "build_cmd": [
+      {
+        "command": "docker-compose build #NAME#",
+        "path": "#WORKSPACE_ROOT#/polo-workbench/"
+      }
+    ],
+    "run_cmd": [
+      {
+        "command": "docker-compose up -d --no-deps #NAME#",
+        "path": "#WORKSPACE_ROOT#/polo-workbench/"
+      }
+    ]
+  },
+  "users-database": {
+    "repo": "polo-database",
+    "name": "mysql",
+    "groups": ["frontend", "support"],
+    "default_version": "master",
+    "build_cmd": [
+      {
+        "command": "docker-compose build #NAME#",
+        "path": "#WORKSPACE_ROOT#/polo-workbench/"
+      }
+    ],
+    "run_cmd": [
+      {
+        "command": "docker-compose up -d --no-deps #NAME#",
+        "path": "#WORKSPACE_ROOT#/polo-workbench/"
+      }
+    ]
+  },
+  "users-database-migrate": {
+    "repo": "polo-database",
+    "name": "flyway",
+    "groups": ["frontend", "support"],
+    "default_version": "master",
+    "depends_on": {
+      "run": ["users-database"]
+    },
+    "build_cmd": [
+      {
+        "command": "docker-compose build #NAME#",
+        "path": "#WORKSPACE_ROOT#/polo-workbench/"
+      }
+    ],
+    "run_cmd": [
+      {
+        "command": "docker-compose up -d --no-deps #NAME#",
+        "path": "#WORKSPACE_ROOT#/polo-workbench/"
+      }
+    ]
   }
 }

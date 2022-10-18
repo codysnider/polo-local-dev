@@ -1,0 +1,47 @@
+{
+  "spot-kafka": {
+    "repo": "spot-local-dev",
+    "name": "kafka",
+    "groups": [
+      "spot"
+    ],
+    "default_version": "master",
+    "build_cmd": [
+      {
+        "command": "docker-compose build #NAME#",
+        "path": "#WORKSPACE_ROOT#/spot-local-dev/"
+      }
+    ],
+    "run_cmd": [
+      {
+        "command": "docker-compose up -d --no-deps #NAME#",
+        "path": "#WORKSPACE_ROOT#/spot-local-dev/"
+      }
+    ]
+  },
+  "spot-order": {
+    "repo": "spot-order",
+    "name": "spot-order",
+    "groups": [
+      "spot"
+    ],
+    "default_version": "master",
+    "depends_on": {
+      "run": [
+        "spot-kafka"
+      ]
+    },
+    "build_cmd": [
+      {
+        "command": "docker-compose build #NAME#",
+        "path": "#WORKSPACE_ROOT#/#NAME#/"
+      }
+    ],
+    "run_cmd": [
+      {
+        "command": "docker-compose up -d --no-deps #NAME#",
+        "path": "#WORKSPACE_ROOT#/#NAME#/"
+      }
+    ]
+  }
+}

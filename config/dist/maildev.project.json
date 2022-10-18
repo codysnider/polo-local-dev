@@ -1,0 +1,20 @@
+{
+  "maildev": {
+    "repo": "polo-workbench",
+    "name": "maildev",
+    "groups": ["frontend", "utilities"],
+    "default_version": "master",
+    "build_cmd": [
+      {
+        "command": "docker-compose build #NAME#",
+        "path": "#WORKSPACE_ROOT#/#REPO#/"
+      }
+    ],
+    "run_cmd": [
+      {
+        "command": "docker-compose up -d --no-deps #NAME#",
+        "path": "#WORKSPACE_ROOT#/#REPO#/"
+      }
+    ]
+  }
+}

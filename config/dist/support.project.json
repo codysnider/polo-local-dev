@@ -1,0 +1,37 @@
+{
+  "x-support": {
+    "repo": "x-support",
+    "name": "x-support",
+    "groups": ["support"],
+    "default_version": "master",
+    "depends_on": {
+      "run": ["users-database", "maildev", "postgres-support", "redis-support", "x-notification", "auth", "account-auth"]
+    },
+    "run_cmd": [
+      {
+        "command": "docker-compose up -d --no-deps #NAME#",
+        "path": "#WORKSPACE_ROOT#/polo-workbench/"
+      }
+    ]
+  },
+  "postgres-support": {
+    "name": "postgres-support",
+    "groups": ["support"],
+    "run_cmd": [
+      {
+        "command": "docker-compose up -d --no-deps #NAME#",
+        "path": "#WORKSPACE_ROOT#/polo-workbench/"
+      }
+    ]
+  },
+  "redis-support": {
+    "name": "redis-support",
+    "groups": ["support"],
+    "run_cmd": [
+      {
+        "command": "docker-compose up -d --no-deps #NAME#",
+        "path": "#WORKSPACE_ROOT#/polo-workbench/"
+      }
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "x-notification": {
+    "repo": "x-notification-service",
+    "name": "x-notification",
+    "groups": ["support"],
+    "default_version": "master",
+    "depends_on": {
+      "run": ["x-redis", "postgres-consumer-x-notification"]
+    },
+    "run_cmd": [
+      {
+        "command": "docker-compose up -d --no-deps #NAME#",
+        "path": "#WORKSPACE_ROOT#/polo-workbench/"
+      }
+    ]
+  },
+  "postgres-consumer-x-notification": {
+    "name": "postgres-consumer-x-notification",
+    "groups": ["support"],
+    "run_cmd": [
+      {
+        "command": "docker-compose up -d --no-deps #NAME#",
+        "path": "#WORKSPACE_ROOT#/polo-workbench/"
+      }
+    ]
+  }
+}

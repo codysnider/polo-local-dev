@@ -51,6 +51,8 @@ func absolutePath(path string) string {
 
 func init() {
 
+	output.Title("Config Check")
+
 	// Ensure ~/.pld/ exists
 	configAbsolutePath := absolutePath(configPath)
 	if _, err := os.Stat(configAbsolutePath); errors.Is(err, os.ErrNotExist) {
@@ -66,14 +68,12 @@ func init() {
 	Config, commonConfigErr = loadCommonConfig()
 	if commonConfigErr != nil {
 		output.Error(commonConfigErr.Error())
-		os.Exit(1)
 	}
 
 	// Load dist and local project configs
 	distConfigs, installedConfigs, configLoadErr := loadProjectConfigs()
 	if configLoadErr != nil {
 		output.Error(configLoadErr.Error())
-		os.Exit(1)
 	}
 
 	// Search for uninstalled configs and install
@@ -82,9 +82,9 @@ func init() {
 			installErr := installProjectConfig(projectName, distConfigs[projectName])
 			if installErr != nil {
 				output.Error(installErr.Error())
-				os.Exit(1)
+			} else {
+				output.Ok(fmt.Sprintf("Installing config: %s", projectName))
 			}
-			output.Ok(fmt.Sprintf("Installing config: %s", projectName))
 		}
 	}
 
@@ -94,12 +94,13 @@ func init() {
 	_, installedConfigs, configLoadErr = loadProjectConfigs()
 	if configLoadErr != nil {
 		output.Error(configLoadErr.Error())
-		os.Exit(1)
 	}
 
 	for projectName, project := range installedConfigs {
 		ProjectConfigs[projectName] = project
 	}
+
+	output.Ok("Config validated")
 }
 
 func generateCommonConfig() (CommonConfig, error) {
@@ -148,6 +149,49 @@ func loadCommonConfig() (CommonConfig, error) {
 	}
 
 	return commonConfig, nil
+}
+
+func Reload() {
+
+	d, err := os.Open(absolutePath(configPath))
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	defer func(d *os.File) {
+		_ = d.Close()
+	}(d)
+
+	files, err := d.Readdir(-1)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	for _, file := range files {
+		if file.Mode().IsRegular() {
+			if strings.Contains(file.Name(), ".project.json") {
+				if deleteErr := os.Remove(absolutePath(configPath) + string(os.PathSeparator) + file.Name()); deleteErr != nil {
+					output.Error(fmt.Sprintf("could not delete %s", file.Name()))
+					continue
+				}
+			}
+		}
+	}
+
+	// Load dist and local project configs
+	distConfigs, installedConfigs, _ := loadProjectConfigs()
+
+	for projectName := range distConfigs {
+		if _, installed := installedConfigs[projectName]; !installed {
+			installErr := installProjectConfig(projectName, distConfigs[projectName])
+			if installErr != nil {
+				output.Error(installErr.Error())
+				os.Exit(1)
+			}
+			output.Ok(fmt.Sprintf("Installing config: %s", projectName))
+		}
+	}
 }
 
 func loadProjectConfigs() (map[string]Project, map[string]Project, error) {

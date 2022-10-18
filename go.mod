@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/aws/aws-sdk-go v1.44.110
+	github.com/briandowns/spinner v1.19.0
 	github.com/docker/docker v20.10.17+incompatible
 	github.com/fatih/color v1.13.0
 	github.com/go-git/go-git/v5 v5.4.2
@@ -12,6 +13,7 @@ require (
 	github.com/joho/godotenv v1.4.0
 	github.com/manifoldco/promptui v0.9.0
 	github.com/spf13/cobra v1.5.0
+	github.com/tufin/asciitree v0.0.0-20210127111056-bf70173ef677
 	golang.org/x/oauth2 v0.0.0-20220822191816-0ebed06d0094
 )
 

@@ -1,0 +1,43 @@
+{
+  "auth": {
+    "repo": "platform-auth",
+    "name": "auth",
+    "groups": ["frontend"],
+    "default_version": "master",
+    "depends_on": {
+      "run": ["postgres-auth"]
+    },
+    "run_cmd": [
+      {
+        "command": "docker-compose up -d --no-deps #NAME#",
+        "path": "#WORKSPACE_ROOT#/polo-workbench/"
+      }
+    ]
+  },
+  "postgres-auth": {
+    "name": "postgres_auth",
+    "groups": ["frontend"],
+    "default_version": "master",
+    "run_cmd": [
+      {
+        "command": "docker-compose up -d --no-deps #NAME#",
+        "path": "#WORKSPACE_ROOT#/polo-workbench/"
+      }
+    ]
+  },
+  "account-auth": {
+    "repo": "account-auth",
+    "name": "account-auth",
+    "groups": ["frontend"],
+    "default_version": "master",
+    "depends_on": {
+      "run": ["auth", "x-redis"]
+    },
+    "run_cmd": [
+      {
+        "command": "docker-compose up -d --no-deps #NAME#",
+        "path": "#WORKSPACE_ROOT#/polo-workbench/"
+      }
+    ]
+  }
+}

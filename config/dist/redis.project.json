@@ -1,0 +1,13 @@
+{
+  "x-redis": {
+    "name": "x-redis",
+    "groups": ["frontend", "utilities"],
+    "default_version": "master",
+    "run_cmd": [
+      {
+        "command": "docker-compose up -d --no-deps #NAME#",
+        "path": "#WORKSPACE_ROOT#/polo-workbench/"
+      }
+    ]
+  }
+}
