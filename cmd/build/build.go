@@ -1,7 +1,7 @@
 package build
 
 import (
-	"bytes"
+	"bufio"
 	"fmt"
 	"github.com/poloniex/polo-local-dev/cmd/util"
 	"github.com/poloniex/polo-local-dev/config"
@@ -52,26 +52,57 @@ var Command = &cobra.Command{
 				output.Plain(fmt.Sprintf("Command: %s", shellCmd.String()))
 				output.Plain(fmt.Sprintf("Path: %s", shellCmd.Dir))
 
-				s := output.Spin("Building", "Done")
-
-				var stdoutBuffer, stderrBuffer bytes.Buffer
-				shellCmd.Stdout = &stdoutBuffer
-				shellCmd.Stderr = &stderrBuffer
+				// Get stdout and stderr pipes
+				stderr, _ := shellCmd.StderrPipe()
+				stdout, _ := shellCmd.StdoutPipe()
 				if err := shellCmd.Start(); err != nil {
 					output.Error(err.Error())
 					os.Exit(1)
 				}
-				if err := shellCmd.Wait(); err != nil {
-					if exiterr, ok := err.(*exec.ExitError); ok {
+
+				// Create output writer channels
+				outputWriter := make(chan string)
+				closeSignal := make(chan bool)
+				finished := make(chan bool)
+
+				// Create output writer coroutine
+				go output.FifoOutput(6, outputWriter, closeSignal, finished)
+
+				// Add STDERR writer coroutine
+				go func() {
+					scanner := bufio.NewScanner(stderr)
+					scanner.Split(bufio.ScanLines)
+					for scanner.Scan() {
+						m := scanner.Text()
+						outputWriter <- m
+					}
+				}()
+
+				// Add STDOUT writer coroutine
+				go func() {
+					scanner := bufio.NewScanner(stdout)
+					scanner.Split(bufio.ScanLines)
+					for scanner.Scan() {
+						m := scanner.Text()
+						outputWriter <- m
+					}
+				}()
+
+				// Wait for command to exit
+				cmdErr := shellCmd.Wait()
+
+				// Send signal to coroutine to clear output
+				closeSignal <- true
+
+				// Block until writer coroutine finished
+				<-finished
+
+				if cmdErr != nil {
+					if exiterr, ok := cmdErr.(*exec.ExitError); ok {
 						output.Error(fmt.Sprintf("Exit Status: %d", exiterr.ExitCode()))
 					}
-				}
-
-				s.Stop()
-
-				if verbose, verboseFlagErr := cmd.Flags().GetBool("verbose"); verbose && verboseFlagErr == nil {
-					fmt.Println(shellCmd.Stdout)
-					fmt.Println(shellCmd.Stderr)
+				} else {
+					output.Ok("Done")
 				}
 			}
 		}

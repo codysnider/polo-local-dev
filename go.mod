@@ -15,6 +15,7 @@ require (
 	github.com/spf13/cobra v1.5.0
 	github.com/tufin/asciitree v0.0.0-20210127111056-bf70173ef677
 	golang.org/x/oauth2 v0.0.0-20220822191816-0ebed06d0094
+	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211
 )
 
 require (
