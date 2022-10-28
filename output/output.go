@@ -13,6 +13,7 @@ import (
 
 	"github.com/briandowns/spinner"
 	"github.com/fatih/color"
+	"github.com/pborman/ansi"
 )
 
 var red = color.New(color.FgRed).SprintFunc()
@@ -69,18 +70,15 @@ func PlainString(content string) string {
 	return fmt.Sprintf("\t%s\n", content)
 }
 
-func FifoOutput(lines int, content <-chan string, closeSignal <-chan bool, finished chan<- bool) {
+func FifoOutput(title string, lines int, content <-chan string, closeSignal <-chan bool, finished chan<- bool) {
 
 	// Setup prefix and wrappers
 	prefix := "┃ "
-	topWrapper := "┏" + strings.Repeat("━", 10)
-	bottomWrapper := "┗" + strings.Repeat("━", 10)
+	topWrapper := "┏" + strings.Repeat("━", len(title)-1)
+	bottomWrapper := "┗" + strings.Repeat("━", len(title)-1)
 
 	// Allocate queue list
 	writeQueue := list.New()
-
-	// Allocate previous line write count
-	lastWrite := 0
 
 	// Calc current terminal width
 	// TODO: Test this in headless execution
@@ -93,63 +91,82 @@ func FifoOutput(lines int, content <-chan string, closeSignal <-chan bool, finis
 	maxLineLength := float64(terminalWidth - 10)
 
 	// Write upper wrapper
-	Plain("\n")
+	Plain("\n" + title + "\n")
 	Plain(topWrapper + "\n")
+
+	// Prefill newlines
+	for i := 0; i < lines-1; i++ {
+		Plain(prefix + "\n")
+		writeQueue.PushBack(" ")
+	}
+	Plain(bottomWrapper + "\n")
+
+	// Allocate previous line write count
+	lastWrite := lines
 
 	for {
 		select {
 		case newContent := <-content:
 
-			// FIFO the queue
-			writeQueue.PushBack(newContent)
-			if writeQueue.Len() > lines {
-				writeQueue.Remove(writeQueue.Front())
-			}
+			// Strip ANSI control codes
+			cleanContent, _ := ansi.Strip([]byte(newContent))
 
-			// Clear previous writes
-			for i := 0; i < lastWrite; i++ {
+			// Split lines
+			newContentLines := strings.Split(strings.ReplaceAll(string(cleanContent), "\r\n", "\n"), "\n")
 
-				// Render ANSI codes to move cursor up one and clear line
-				fmt.Print("\033[1A\033[K")
-			}
+			for _, line := range newContentLines {
 
-			// Set lastWrite to number of lines we are about to write
-			lastWrite = writeQueue.Len()
-			for e := writeQueue.Front(); e != nil; e = e.Next() {
-
-				// Check string assertion on content
-				lineContent, lineContentOk := e.Value.(string)
-				if !lineContentOk {
-
-					// Deduct one line from written count and continue loop
-					lastWrite--
-					continue
+				// FIFO the queue
+				writeQueue.PushBack(line)
+				if writeQueue.Len() > lines {
+					writeQueue.Remove(writeQueue.Front())
 				}
 
-				// Replace tabs with spaces
-				lineContent = strings.ReplaceAll(lineContent, "\t", strings.Repeat(" ", 4))
+				// Clear previous writes
+				for i := 0; i < lastWrite; i++ {
 
-				// Trim to prevent wrapping
-				lineContent = lineContent[:int(math.Min(maxLineLength, float64(len(lineContent))))]
+					// Render ANSI codes to move cursor up one and clear line
+					fmt.Print("\033[1A\033[K")
+				}
 
-				// Render with plain text formatting
-				Plain(prefix + lineContent + "\n")
+				// Set lastWrite to number of lines we are about to write
+				lastWrite = writeQueue.Len()
+				for e := writeQueue.Front(); e != nil; e = e.Next() {
+
+					// Check string assertion on content
+					lineContent, lineContentOk := e.Value.(string)
+					if !lineContentOk {
+
+						// Deduct one line from written count and continue loop
+						lastWrite--
+						continue
+					}
+
+					// Replace tabs with spaces
+					lineContent = strings.ReplaceAll(lineContent, "\t", strings.Repeat(" ", 4))
+
+					// Trim to prevent wrapping
+					lineContent = lineContent[:int(math.Min(maxLineLength, float64(len(lineContent))))]
+
+					// Render with plain text formatting
+					Plain(prefix + lineContent + "\n")
+				}
+
+				lastWrite++
+				Plain(bottomWrapper + "\n")
 			}
-
-			lastWrite++
-			Plain(bottomWrapper + "\n")
 
 		case <-closeSignal:
 
 			// Clear previous writes along with wrappers
-			for i := 0; i < lastWrite+2; i++ {
+			for i := 0; i < lastWrite+3; i++ {
 
 				// Render ANSI codes to move cursor up one and clear line
 				fmt.Print("\033[1A\033[K")
 			}
 
-			// Give terminal 10ms to catch up. This shouldn't be necessary but mac is gunna mac.
-			time.Sleep(time.Millisecond * 10)
+			// Give terminal time to catch up. This shouldn't be necessary but mac is gunna mac.
+			time.Sleep(time.Millisecond * 100)
 
 			// Write to the finished channel to unblock the parent/calling process and return
 			finished <- true

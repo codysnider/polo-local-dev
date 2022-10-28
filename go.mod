@@ -3,6 +3,7 @@ module github.com/poloniex/polo-local-dev
 go 1.18
 
 require (
+	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d
 	github.com/aws/aws-sdk-go v1.44.110
 	github.com/briandowns/spinner v1.19.0
 	github.com/docker/docker v20.10.17+incompatible
@@ -12,6 +13,7 @@ require (
 	github.com/hashicorp/go-version v1.6.0
 	github.com/joho/godotenv v1.4.0
 	github.com/manifoldco/promptui v0.9.0
+	github.com/pborman/ansi v1.0.0
 	github.com/spf13/cobra v1.5.0
 	github.com/tufin/asciitree v0.0.0-20210127111056-bf70173ef677
 	golang.org/x/oauth2 v0.0.0-20220822191816-0ebed06d0094

@@ -47,6 +47,10 @@ var Command = &cobra.Command{
 			project := config.GetProjectByKey(projectKey)
 			output.Section(project.Name)
 
+			if len(project.BuildPrepare()) == 0 {
+				output.Plain("No build commands defined")
+			}
+
 			for _, shellCmd := range project.BuildPrepare() {
 
 				output.Plain(fmt.Sprintf("Command: %s", shellCmd.String()))
@@ -66,7 +70,7 @@ var Command = &cobra.Command{
 				finished := make(chan bool)
 
 				// Create output writer coroutine
-				go output.FifoOutput(6, outputWriter, closeSignal, finished)
+				go output.FifoOutput("Build Command Output", 6, outputWriter, closeSignal, finished)
 
 				// Add STDERR writer coroutine
 				go func() {
