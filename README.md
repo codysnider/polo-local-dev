@@ -170,3 +170,66 @@ Get details about project
 ```bash
 pld project details --all
 ```
+
+## Config Format
+
+*Note: All project config files must be named in the *.project.json format and each can contain any number of projects. These are converted and copied during PLD install and config reload operations.* 
+
+### Parameters
+
+| Parameter Name     | Parameter Description                                                                                         | Required |
+|--------------------|---------------------------------------------------------------------------------------------------------------|----------|
+| PROJECT-NAME       | Distinct name of project, must be universally unique in config files                                          | YES      |
+| REPO-NAME          | Repository name. Use for both git and filesystem operations                                                   | YES      |
+| DOCKER-NAME        | Name for project, must match with service name in docker compose                                              | YES      |
+| SERVICE-GROUP      | Optional service group membership for use with `--group` flags                                                | NO       |
+| DEFAULT-GIT-BRANCH | Base branch for repo, should be main or master unless a larger epic is in progress. Use for git sync commands | YES      |
+| BUILD-BASH-COMMAND | Build-phase bash command, any number can be defined, run in sequence and expect a 0 exit code                 | NO       |
+| BUILD-EXEC-PATH    | Filesystem location in which the paired command should execute                                                | NO       |
+| RUN-BASH-COMMAND   | Run-phase bash command, any number can be defined, run in sequence and expect a 0 exit code                   | NO       |
+| RUN-EXEC-PATH      | Filesystem location in which the paired command should execute                                                | NO       |
+
+### Format Template
+
+```json
+{
+  "PROJECT-NAME": {
+    "repo": "REPO-NAME",
+    "name": "DOCKER-NAME",
+    "groups": [
+      "SERVICE-GROUP",
+      "SERVICE-GROUP",
+      "SERVICE-GROUP"
+    ],
+    "default_version": "DEFAULT-GIT-BRANCH",
+    "build_cmd": [
+      {
+        "command": "BUILD-BASH-COMMAND",
+        "path": "BUILD-EXEC-PATH"
+      },
+      {
+        "command": "BUILD-BASH-COMMAND",
+        "path": "BUILD-EXEC-PATH"
+      },
+      {
+        "command": "BUILD-BASH-COMMAND",
+        "path": "BUILD-EXEC-PATH"
+      }
+    ],
+    "run_cmd": [
+      {
+        "command": "RUN-BASH-COMMAND",
+        "path": "RUN-EXEC-PATH"
+      },
+      {
+        "command": "RUN-BASH-COMMAND",
+        "path": "RUN-EXEC-PATH"
+      },
+      {
+        "command": "RUN-BASH-COMMAND",
+        "path": "RUN-EXEC-PATH"
+      }
+    ]
+  }
+}
+```
